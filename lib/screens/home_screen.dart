@@ -19,21 +19,48 @@ class _HomeScreenState extends State<HomeScreen> {
   File? image;
   late ImagePicker imagePicker;
   late ImageLabeler imageLabeler;
+  late Interpreter interpreter;
+  late List<String> labels;
   String results = "";
 
   @override
   void initState() {
     super.initState();
     imagePicker = ImagePicker();
-    // ImageLabelerOptions options = ImageLabelerOptions(confidenceThreshold: 0.8);
-    // labeler = ImageLabeler(options: options);
     loadModel();
+    // loadModelAndLabels();
+  }
+
+  // Future<void> loadModelAndLabels() async {
+  //   try {
+  //     // Load model
+  //     final modelPath = await getModelPath('assets/ml/fruits2.tflite');
+  //     interpreter = await Interpreter.fromAsset(modelPath);
+  //
+  //     // Load labels
+  //     final labelData = await rootBundle.loadString('assets/ml/labels.txt');
+  //     labels = labelData.split('\n');
+  //   } catch (e) {
+  //     print('Error loading model: $e');
+  //   }
+  // }
+
+  Future<String> getModelPath(String asset) async {
+    final path = '${(await getApplicationSupportDirectory()).path}/$asset';
+    await Directory(dirname(path)).create(recursive: true);
+    final file = File(path);
+    if (!await file.exists()) {
+      final byteData = await rootBundle.load(asset);
+      await file.writeAsBytes(byteData.buffer
+          .asUint8List(byteData.offsetInBytes, byteData.lengthInBytes));
+    }
+    return file.path;
   }
 
   loadModel()async{
-    final modelPath = await getModelPath('assets/ml/fruits.tflite');
+    final modelPath = await getModelPath('assets/ml/fruits2.tflite');
     final options = LocalLabelerOptions(
-      confidenceThreshold: 0.9,
+      confidenceThreshold: 0.6,
       modelPath: modelPath,
     );
     imageLabeler = ImageLabeler(options: options);
@@ -79,18 +106,36 @@ class _HomeScreenState extends State<HomeScreen> {
       results;
     });
   }
+  // void classifyImage() async {
+  //   if (image == null || interpreter == null) return;
+  //
+  //   // Load and preprocess the image
+  //   final img = File(image!.path);
+  //   final inputImage = ImageProcessorBuilder()
+  //       .add(ResizeOp(224, 224, ResizeMethod.BILINEAR))
+  //       .build()
+  //       .processImage(img);
+  //
+  //   // Allocate buffers
+  //   final input = TensorBuffer.createDynamic(TfLiteType.float32);
+  //   input.loadImage(inputImage);
+  //
+  //   final output = TensorBufferFloat(interpreter.getOutputTensor(0).shape);
+  //
+  //   // Run inference
+  //   interpreter.run(input.buffer, output.buffer);
+  //
+  //   // Get results
+  //   final probabilities = output.getDoubleList();
+  //   final maxIndex = probabilities.indexWhere((val) => val == probabilities.reduce((a, b) => a > b ? a : b));
+  //   results = "Detected: ${labels[maxIndex]} (${(probabilities[maxIndex] * 100).toStringAsFixed(2)}%)";
+  //
+  //   setState(() {
+  //     results;
+  //   });
+  // }
 
-  Future<String> getModelPath(String asset) async {
-    final path = '${(await getApplicationSupportDirectory()).path}/$asset';
-    await Directory(dirname(path)).create(recursive: true);
-    final file = File(path);
-    if (!await file.exists()) {
-      final byteData = await rootBundle.load(asset);
-      await file.writeAsBytes(byteData.buffer
-          .asUint8List(byteData.offsetInBytes, byteData.lengthInBytes));
-    }
-    return file.path;
-  }
+
 
   @override
   Widget build(BuildContext context) {
