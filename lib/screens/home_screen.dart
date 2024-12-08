@@ -100,7 +100,7 @@ class _HomeScreenState extends State<HomeScreen> {
       final String text = label.label;
       final int index = label.index;
       final double confidence = label.confidence;
-      results += "Fruit name: "+text+"\n" + "Confidence: " + confidence.toStringAsFixed(2) + "\n";
+      results += "Name: "+text+"\n" + "Confidence: " + confidence.toStringAsFixed(2) + "\n";
     }
     setState(() {
       results;
@@ -143,7 +143,7 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
         appBar: AppBar(
           title: const Text(
-            'Image Recognition',
+            'Image Recognizer',
             style: TextStyle(
               color: Colors.black,
             ),
