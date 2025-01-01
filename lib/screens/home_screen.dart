@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:google_mlkit_image_labeling/google_mlkit_image_labeling.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:tflite_flutter/tflite_flutter.dart';
@@ -9,6 +10,8 @@ import 'package:tflite_project/constants/colors.dart';
 import 'package:flutter/services.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:tflite_project/main.dart';
+import 'package:tflite_project/screens/live_camera_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -58,7 +61,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   loadModel()async{
-    final modelPath = await getModelPath('assets/ml/fruits2.tflite');
+    final modelPath = await getModelPath('assets/ml/mango.tflite');
     final options = LocalLabelerOptions(
       confidenceThreshold: 0.6,
       modelPath: modelPath,
@@ -100,7 +103,7 @@ class _HomeScreenState extends State<HomeScreen> {
       final String text = label.label;
       final int index = label.index;
       final double confidence = label.confidence;
-      results += "Name: "+text+"\n" + "Confidence: " + confidence.toStringAsFixed(2) + "\n";
+      results += "Name: "+text+"\n" + "Confidence: " + confidence.toStringAsFixed(2);
     }
     setState(() {
       results;
@@ -178,7 +181,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         size: 150,
                       )
                     : ClipRRect(
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: BorderRadius.circular(16),
                         child: Image.file(
                           image!,
                           // fit: BoxFit.cover,
@@ -205,7 +208,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           color: Colors.white,
                         ),
                         Text(
-                          'Choose image',
+                          ' Choose image',
                           style: TextStyle(color: Colors.white),
                         ),
                       ],
@@ -225,12 +228,37 @@ class _HomeScreenState extends State<HomeScreen> {
                           color: Colors.white,
                         ),
                         Text(
-                          'Take a picture',
+                          ' Take a picture',
                           style: TextStyle(color: Colors.white),
                         ),
                       ],
                     ),
-                  )
+                  ),
+                ],
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  ElevatedButton(
+                    onPressed: () {
+                      Navigator.push(context, MaterialPageRoute(builder: (context) => CameraScreen()));
+                    },
+                    style: ButtonStyle(
+                      backgroundColor: MaterialStateProperty.all(purpleColor),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.video_camera_back_outlined,
+                          color: Colors.white,
+                        ),
+                        Text(
+                          ' Live camera footage',
+                          style: TextStyle(color: Colors.white),
+                        ),
+                      ],
+                    ),
+                  ),
                 ],
               ),
               SizedBox(
@@ -243,10 +271,11 @@ class _HomeScreenState extends State<HomeScreen> {
               SizedBox(
                 height: 10,
               ),
+              results != "" ?
               Container(
                 width: size.width,
                 decoration: BoxDecoration(
-                  color: bgLightPurpleColor,
+                  color: purpleColor,
                   shape: BoxShape.rectangle,
                   borderRadius: BorderRadius.circular(12),
                 ),
@@ -259,7 +288,8 @@ class _HomeScreenState extends State<HomeScreen> {
                   ],
                 ),
                 padding: EdgeInsets.all(10),
-              )
+              ) :
+                  SizedBox(height: 10,),
             ],
           ),
         ));
